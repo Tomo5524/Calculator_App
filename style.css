@@ -1,0 +1,70 @@
+/* to expand div to full height
+set html, body and container to height: 100%; */
+
+html,body{
+    height: 100%;
+}
+
+.container{
+    background-color: #061659;
+    height: 100%;
+}
+
+.calculator{
+    margin-top: 50px;
+    /* for button to be positioned in center, use text-align: ; */
+     
+    background-color: gray;
+    height: 650px;
+    width: 500px;
+    /* position calculator in center */
+    margin: 0 auto;
+   
+
+}
+
+#header{
+    text-align: center;
+    color: white;
+}
+
+.btn{
+    border-radius: 5px;
+    height: 100px;
+    width: 100px;
+    font-size: 50px;
+    /* padding-left: 0px */
+}
+
+#operator.btn{
+    font-size: 50px;
+}
+
+#input{
+    border-radius: 5px;
+    height:50px;
+    width: 400px;
+    text-align: right;
+    margin: 20px;
+    font-size: 50px;
+    /* position calculator in center */
+    /* margin: 0 auto; */
+}
+
+.display-container{
+    width: 100%;
+    /* adjust display bar horizontally to buttons row */
+    padding-left: 20px;
+}
+
+.sidebtn{
+    height: 50px;
+    width: 205px;
+    font-size: 25px;
+    
+}
+.subButton{
+    /* adjust display bar horizontally to buttons row */
+    padding-left: 37px;
+
+}
