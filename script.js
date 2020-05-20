@@ -1,10 +1,7 @@
 // global variables
-const add = document.querySelector('add')
-const sub = document.querySelector('subtract')
-const multi = document.querySelector('multiply')
-const dividion = document.querySelector('dividion')
+
 const input = document.querySelector('#input')
-const btn = document.querySelectorAll('.btn')
+// const btn = document.querySelectorAll('.btn')
 const clear = document.querySelector('#clear')
 const calculate = document.querySelector('#calculate')
 const display = document.querySelector('.display-container')
@@ -17,6 +14,7 @@ let num1 = 0;
 let num2 = 0;
 let num1_flag = true
 let num2_flag = false
+let dot_flag = false;
 
 function Getadd(n1,n2){
     return n1+n2;
@@ -40,7 +38,7 @@ function operate(n1,n2,o){
     // handle decimal
     n1 = n1.indexOf('.') === -1 ? parseInt(n1):parseFloat(n1)
     n2 = n2.indexOf('.') === -1 ? parseInt(n2):parseFloat(n2)
-    console.log(n1,n2,'processed')
+    //console.log(n1,n2,'processed')
     if (o === '+'){
         return Getadd(n1,n2)
     }
@@ -55,50 +53,168 @@ function operate(n1,n2,o){
     }
 }
 
+
 // delete functon
-del.addEventListener('click',(e) => {
-    if(stringValueStore){
-        console.log(num1_flag)
-        console.log(num2_flag)
-        stringValueStore = stringValueStore.slice(0,stringValueStore.length-1)
-        console.log(stringValueStore)
+
+input.addEventListener('input',(e)=>{
+    main(e);
+});
+
+// clear.addEventListener('click',main);
+
+// // put these in main function
+// del.addEventListener('click',main);
+const btn = document.querySelectorAll('button')
+btn.forEach(val =>{
+    val.addEventListener('click',(e) =>{
+        main(e)
+    })
+})
+
+let cur_num = '0';
+let storeVal = '0';
+input.value = '0';
+
+
+// input value and string value are the same
+function main(e){
+    
+    console.log(input.value) // prints values in display
+    
+    const opeArr = ['+','-','*','/']
+    let CantHaveZeroNextToOpe = false;
+    let userInput = ''
+    let res = ''
+    let delete_input = false;
+
+    if(e.type = 'input'){
+        userInput = e.data;
+    }
+
+    if(e.type = 'click'){
+        userInput = e.target.innerHTML;
+    }
+
+    storeVal += userInput
+    console.log(storeVal)
+    
+    if (delete_input){
+        input.value = '';
+        delete_input = false;
+        console.log('a')
+    }
+
+    if (userInput === "clear"){
+        input.value = '0'
+        cur_num = '0'
+        console.log('b')
+    }
+
+    if (userInput === "Del"){
+        // when delete operator, update cur_num
+        if (opeArr.includes(input.value.slice(-1))){
+            cur_num = '';
+            let i = input.value.length-2 // starts before operator
+            while(!isNaN(input.value[i])){
+                cur_num = input.value[i] + cur_num
+                i--
+            } 
+            console.log('c')
+            
+        } 
+        else{ // when delete non operator just cut the last char off
+            cur_num = cur_num.slice(0,cur_num.length-1)
+            console.log('d')
+        }
         input.value = input.value.slice(0,input.value.length-1)
-        if (p.textContent){
-            p.textContent = p.textContent.slice(0,input.value.length-1)
+    }
+
+    // if input is not a number
+    else if(isNaN(userInput)){
+        
+        if (isNaN(input.value.slice(-1))){ // if last input is not number
+            if (userInput !== '.' && userInput !== '='){ // if input is strictly operator
+                input.value = input.value.slice(0,input.value.length-1) + userInput // deal with operator swap
+                cur_num = '0'; // update cur_num 
+                console.log('e')
+            }
+            
+        }
+        else if(userInput === '.'){ // if last input is number
+            if (cur_num.indexOf('.') === -1){
+                input.value += userInput // if cur_num dosenst have dot, accept it
+                cur_num += userInput
+                console.log('f')
+            }
+            console.log('g')
+        }
+        else{ // if userinput is '='
+            
+            res = processData(input.value).toString() // get answer
+            let processedRes = parseFloat(res).toFixed(10)
+            if (res.indexOf('.') !== -1 && res !== "Error" && res !== "0" && 1 < res.slice(res.indexOf('.')+1).length){
+                // round
+                let dotIdx = res.indexOf('.')
+                processedRes = processedRes.toString()
+                // if number after dot is different, round up
+                if (processedRes[dotIdx+1] !== res[dotIdx+1]){
+                    input.value = parseFloat(res).toFixed(1)
+                }
+                // no round 
+                else{
+                    input.value = parseFloat(res).toFixed(10);
+                }
+            
+            // if no float and calculatable number    
+            }else{
+                input.value = res
+            }
+            //input.value = res.indexOf('.') === -1 ? res : parseFloat(res).toFixed(10);
+            // reset all accumulated values 
+            cur_num = '0';
+            delete_input = true; // delete result
         }
         
+        
     }
-});
-
-input.addEventListener('input',getTypeInput);
-
-function getTypeInput(e){
-    // how to deal with user input not button click
-    const arr = ["+","-","*","/"]
-    let userInp = e.target.value;
-    
-    // only accepts numer and operator
-    if (!isNaN(userInp) || arr.includes(userInp)){
-        console.log('asfsd')
-        stringValueStore += userInp;
-        input.value += userInp;
+    // input is number
+    else{
+        
+        // when input is 0, deals with duplicates 
+        if(userInput === '0'){
+            if (cur_num.length !== 1){ 
+            input.value += userInput
+            cur_num += userInput
+            console.log('i')
+            }
+            else{ // if cur_num's length is 1 and last char is not 0, accept it
+                if (cur_num.slice(-1) !== '0'){
+                    input.value += userInput
+                    cur_num += userInput
+                } 
+                console.log('j')
+            }
+        }
+        // if userinput is not 0
+        else if(cur_num.length === 1 ){
+            input.value = input.value.slice(0,input.value.length-1) + userInput // if cur_num is only one length, swap 0 with userinput
+            console.log('k')
+        }
+        else{
+            input.value += userInput
+            cur_num += userInput 
+            console.log('l')
+        }
+        
+       
     }
+}       
+
+
+function checkLastChar(s){
+    const ar = ['+',"-",'*','/']
+    return ar.includes(s.slice(-1))
 }
-
-clear.addEventListener('click',(e)=>{
-    //console.log(e)
-    //console.log(num)
-    if(input){
-        input.value = '';
-        stringValueStore = ''
-        p.textContent = '';
-        num1 = 0;
-        num2 = 0;
-        num1_flag = true;
-        num2_flag = false;
-    }   
-});
-
 
 function processData(Str){
     
@@ -186,139 +302,3 @@ function processData(Str){
 
 }
 
-function displayInput(){
-    let res = 0;
-    // assign each buutton addEvenlister so all buttons activated
-    btn.forEach(val => {
-        val.addEventListener('click',(e) => {
-            if (res){
-                console.log(res)
-                input.value = ''
-                p.textContent = '';
-                res = 0
-            }
-            let userInput = e.target.innerHTML;
-            // let temp = userInput
-            // check first input is number
-            if(stringValueStore){
-                if (userInput && userInput === '+' || userInput === '-' || userInput === '*' || userInput === '/'){
-                    // if operator is pressed in the first place
-                    // if ((!num1 && !num2) && (userInput.slice(-1) === '+' || userInput.slice(-1) === '-' || userInput.slice(-1) === '*' || userInput.slice(-1) === '/')){
-                    //     temp = ''
-                    // }
-                    if(num1){
-                        num1_flag = false;
-                        num2_flag = true;
-                        if(input){
-                            //p.textContent = input.value + userInput;
-                            input.value = input.value + userInput;
-                        }
-                    }
-                    operaterChoosen = userInput 
-                    //console.log(num2)
-                    // switch to new operator if last input was operator
-                    if (stringValueStore.slice(-1) === '+' || stringValueStore.slice(-1) === '-' || stringValueStore.slice(-1) === '*' || stringValueStore.slice(-1) === '/' ){
-                        stringValueStore = stringValueStore.slice(0,stringValueStore.length-1)
-                    }
-                    
-                }
-            }
-            // handle multiple edge cases
-            // when string ends with number
-            // when num2 is deleted but flag is still true
-            if(userInput === "=" && !num1_flag && num2_flag && !isNaN(stringValueStore.slice(-1))){
-                // if(input){
-                //     input.value = ''
-                // }
-                //let a = 
-                //console.log(a,'meow');
-                res = processData(stringValueStore).toString()
-                stringValueStore = ''
-                // input.value = res
-                // handle decimal
-                // if rounded, cut off alll decimals 
-                console.log(res,'meow',res.indexOf('.'),typeof res)
-                console.log(parseFloat(res),'float')
-                let processedRes = parseFloat(res).toFixed(10)
-                
-                // handle 0/5 and 5/0 and float
-                if (res.indexOf('.') !== -1 && res !== "Error" && res !== "0"){
-                    // round
-                    let dotIdx = res.indexOf('.')
-                    processedRes = processedRes.toString()
-                    // if number after dot is different, round up
-                    if (processedRes[dotIdx+1] !== res[dotIdx+1]){
-                        input.value = parseFloat(res).toFixed(1)
-                    }
-                    // no round 
-                    else{
-                        input.value = parseFloat(res).toFixed(10);
-                    }
-                
-                // if no float and calculatable number    
-                }else{
-                    input.value = res
-                }
-                //input.value = res.indexOf('.') === -1 ? res : parseFloat(res).toFixed(10);
-                // reset all accumulated values 
-                num2 = 0;
-                num1 = 0;
-                num1_flag = true;
-                num2_flag = false;
-            }
-            //e.preventDefault()
-            //console.log(e.target.innerHTML);
-            //const new_input = document.createElement('p');
-            //new_input.textContent = e.target.innerHTML;
-
-            // when firt input is not number
-            
-            // check if input is number
-            if (!isNaN(userInput) || userInput === '.'){
-                if (num1_flag){
-                    // get string of number
-                    // when calling operate function, convert it to int
-                    // has to store value in string
-                    num1 += userInput
-                }
-                if (num2_flag){
-                    num2 += userInput
-                }
-                // hanlde when 0 is the first input
-                if (!input.value && input.value.charAt(0) !== '0'){
-                    console.log(stringValueStore,'firstnumbernotzero')
-                    input.value += userInput // display number
-                    stringValueStore += userInput
-                }
-                // handle if there is only one number and is 0
-                else if (input.value && input.value.length === 1 &&input.value.charAt(0) === '0'){
-                    console.log(stringValueStore,'swap')
-                    input.value = userInput // display number
-                    stringValueStore = userInput
-                }
-                else{
-                    console.log(stringValueStore,'accept')
-                    input.value += userInput // display number
-                    stringValueStore += userInput
-                }
-                    
-            }
-            // check if first input is number or not
-            else{
-                if(stringValueStore && userInput !== "="){
-                    stringValueStore += userInput
-                }
-            }
-            
-            console.log(stringValueStore)
-            console.log(input.value)
-            
-        });
-    });
-    
-
-}
-displayInput()
-
-// create display
-// deals with 12 + 7 - 5 * 3
